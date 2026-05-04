@@ -1,4 +1,18 @@
-<div class="min-h-screen flex items-center justify-center p-4">
+<div
+    x-data="{}"
+    x-init="
+        $watch('$wire.step', (s) => {
+            const off = ['spin', 'result'].includes(s);
+            if (off) { window.stopBGM?.(); } else { window.startBGM?.(); }
+            const btn = document.getElementById('bgm-toggle');
+            if (btn) {
+                btn.textContent = off ? '🔇' : '🔊';
+                btn.title = off ? 'Hidupkan Muzik' : 'Matikan Muzik';
+            }
+        });
+    "
+    class="min-h-screen flex items-center justify-center p-4"
+>
 
     {{-- GATE PASSWORD --}}
     @if($step === 'gate')
@@ -649,11 +663,8 @@ function spinWheel(prizes) {
                 });
             }
 
-            // Senyapkan BGM masa wheel berputar — bagi tick + win sound jelas
-            if (typeof window.stopBGM === 'function') window.stopBGM();
-            // Update icon butang BGM kalau ada
-            const bgmBtn = document.getElementById('bgm-toggle');
-            if (bgmBtn) { bgmBtn.textContent = '🔇'; bgmBtn.title = 'Hidupkan Muzik'; }
+            // Main muzik spin (random pick dari pool)
+            if (typeof window.playSpinSound === 'function') window.playSpinSound();
 
             playClickSound();
             this.$wire.spin();
@@ -696,7 +707,8 @@ function spinWheel(prizes) {
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Wheel stopped — play celebration BEFORE showing result
+                    // Wheel stopped — fade out spin music dan main celebration
+                    if (typeof window.stopSpinSound === 'function') window.stopSpinSound();
                     playWinCelebration();
                     fireConfetti();
 

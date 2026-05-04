@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Prize;
 use App\Models\Setting;
 use App\Models\SpinLog;
+use App\Models\SpinSound;
 use App\Models\Student;
 use App\Models\WinSound;
 use Illuminate\Support\Facades\DB;
@@ -385,12 +386,19 @@ class SpinPage extends Component
             ->values()
             ->toArray();
 
+        $spinSoundUrls = SpinSound::where('aktif', true)
+            ->pluck('file_path')
+            ->map(fn ($path) => asset('storage/' . $path))
+            ->values()
+            ->toArray();
+
         return view('livewire.spin-page')
             ->layout('layouts.spin', [
                 'branchName' => $this->branchName ?? 'Cabutan Bertuah',
                 'bgmType' => Setting::get('bgm_type', 'stock'),
                 'bgmFile' => Setting::get('bgm_file'),
                 'winSoundUrls' => $winSoundUrls,
+                'spinSoundUrls' => $spinSoundUrls,
             ]);
     }
 }

@@ -520,6 +520,57 @@
     });
     let lastWinAudioPick = -1;
 
+    // === SPIN MP3 POOL ===
+    // Admin uploads list dari resource Muzik Spin. Main masa wheel berputar.
+    const SPIN_SOUND_URLS = @json($spinSoundUrls ?? []);
+    const spinAudioPool = SPIN_SOUND_URLS.map(url => {
+        const a = new Audio(url);
+        a.volume = 0.7;
+        a.preload = 'auto';
+        return a;
+    });
+    let lastSpinAudioPick = -1;
+    let currentSpinAudio = null;
+
+    function playSpinSound() {
+        if (!spinAudioPool.length) return;
+        let pick;
+        if (spinAudioPool.length === 1) {
+            pick = 0;
+        } else {
+            do { pick = Math.floor(Math.random() * spinAudioPool.length); } while (pick === lastSpinAudioPick);
+        }
+        lastSpinAudioPick = pick;
+        currentSpinAudio = spinAudioPool[pick];
+        try {
+            currentSpinAudio.currentTime = 0;
+            currentSpinAudio.volume = 0.7;
+            currentSpinAudio.play().catch(() => {});
+        } catch(e) {}
+    }
+
+    function stopSpinSound() {
+        if (!currentSpinAudio) return;
+        const audio = currentSpinAudio;
+        currentSpinAudio = null;
+        // Quick fade-out supaya tak terkejut
+        const startVol = audio.volume;
+        const steps = 8;
+        let i = 0;
+        const fade = setInterval(() => {
+            i++;
+            audio.volume = Math.max(0, startVol * (1 - i / steps));
+            if (i >= steps) {
+                clearInterval(fade);
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        }, 30);
+    }
+
+    window.playSpinSound = playSpinSound;
+    window.stopSpinSound = stopSpinSound;
+
     // === PICK RANDOM & PLAY ===
     const celebrations = [celebration1, celebration2, celebration3, celebration4, celebration5];
     let lastCelebration = -1;
