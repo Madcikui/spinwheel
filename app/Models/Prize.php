@@ -16,10 +16,12 @@ class Prize extends Model
         'warna',
         'gambar',
         'aktif',
+        'boleh_bonus',
     ];
 
     protected $casts = [
         'aktif' => 'boolean',
+        'boleh_bonus' => 'boolean',
     ];
 
     public function branch(): BelongsTo

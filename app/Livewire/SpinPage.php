@@ -243,9 +243,15 @@ class SpinPage extends Component
 
     private function loadPrizes(): void
     {
-        // Papar SEMUA hadiah aktif pada wheel (tanpa filter umur)
-        $this->prizes = Prize::where('aktif', true)
-            ->where('kuantiti_baki', '>', 0)
+        $query = Prize::where('aktif', true)
+            ->where('kuantiti_baki', '>', 0);
+
+        // Bonus code mode: hadiah yang ditandakan tak boleh untuk bonus disembunyi.
+        if ($this->mode === 'bonus') {
+            $query->where('boleh_bonus', true);
+        }
+
+        $this->prizes = $query
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
@@ -290,6 +296,10 @@ class SpinPage extends Component
                 // Get available prizes (filtered by umur if applicable)
                 $prizesQuery = Prize::where('aktif', true)
                     ->where('kuantiti_baki', '>', 0);
+
+                if ($this->mode === 'bonus') {
+                    $prizesQuery->where('boleh_bonus', true);
+                }
 
                 if ($this->studentUmurId !== null) {
                     $prizesQuery->where(function ($q) {

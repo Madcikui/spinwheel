@@ -51,6 +51,10 @@ class PrizeForm
                 Toggle::make('aktif')
                     ->default(true)
                     ->label('Aktif'),
+                Toggle::make('boleh_bonus')
+                    ->default(true)
+                    ->label('Boleh untuk Bonus Code')
+                    ->helperText('Off = hadiah ini tidak akan keluar untuk pemenang yang guna bonus code.'),
             ]);
     }
 }
