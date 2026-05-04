@@ -755,6 +755,9 @@
         }
     }
 
+    window.stopBGM = stopBGM;
+    window.startBGM = startBGM;
+
     function toggleBGM() {
         if (BGM_TYPE === 'off') return;
         const btn = document.getElementById('bgm-toggle');

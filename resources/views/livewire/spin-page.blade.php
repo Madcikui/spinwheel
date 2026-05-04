@@ -649,6 +649,12 @@ function spinWheel(prizes) {
                 });
             }
 
+            // Senyapkan BGM masa wheel berputar — bagi tick + win sound jelas
+            if (typeof window.stopBGM === 'function') window.stopBGM();
+            // Update icon butang BGM kalau ada
+            const bgmBtn = document.getElementById('bgm-toggle');
+            if (bgmBtn) { bgmBtn.textContent = '🔇'; bgmBtn.title = 'Hidupkan Muzik'; }
+
             playClickSound();
             this.$wire.spin();
         },
