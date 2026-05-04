@@ -705,11 +705,9 @@ function spinWheel(prizes) {
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Wheel stopped — show result modal; celebration sound + confetti
-                    // dipanggil dari modal x-init supaya lagu match dengan keluarnya modal
-                    setTimeout(() => {
-                        this.$wire.showResult();
-                    }, 1200);
+                    // Wheel stopped — terus show result; celebration sound + confetti
+                    // dipanggil dari modal x-init supaya lagu match dengan keluarnya modal.
+                    this.$wire.showResult();
                 }
             };
 
