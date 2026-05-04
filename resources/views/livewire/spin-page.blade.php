@@ -635,16 +635,18 @@ function spinWheel(prizes) {
             const ctx = getAudioCtx();
             if (ctx.state === 'suspended') ctx.resume();
 
-            // Preload tada so it's ready when spin ends
-            if (tadaAudio) {
-                tadaAudio.load();
-                // Play silent to unlock, then pause
-                tadaAudio.volume = 0;
-                tadaAudio.play().then(() => {
-                    tadaAudio.pause();
-                    tadaAudio.currentTime = 0;
-                    tadaAudio.volume = 0.8;
-                }).catch(() => {});
+            // Unlock win-audio pool on user gesture — critical for mobile browsers
+            if (typeof winAudioPool !== 'undefined' && winAudioPool.length) {
+                winAudioPool.forEach(audio => {
+                    audio.load();
+                    const originalVol = audio.volume;
+                    audio.volume = 0;
+                    audio.play().then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        audio.volume = originalVol;
+                    }).catch(() => {});
+                });
             }
 
             playClickSound();

@@ -509,33 +509,43 @@
         applause(ctx, 1.5, 4);
     }
 
-    // === TADA MP3 ===
-    let tadaAudio = null;
-    function preloadTada() {
-        tadaAudio = new Audio('/sounds/tada.mp3');
-        tadaAudio.volume = 0.6;
-    }
-    preloadTada();
+    // === WIN MP3 POOL ===
+    // Admin uploads list dari resource Muzik Menang. Fallback ke tada.mp3 kalau kosong.
+    const WIN_SOUND_URLS = @json($winSoundUrls ?? []);
+    const winAudioPool = (WIN_SOUND_URLS.length > 0 ? WIN_SOUND_URLS : ['/sounds/tada.mp3']).map(url => {
+        const a = new Audio(url);
+        a.volume = 0.8;
+        a.preload = 'auto';
+        return a;
+    });
+    let lastWinAudioPick = -1;
 
     // === PICK RANDOM & PLAY ===
     const celebrations = [celebration1, celebration2, celebration3, celebration4, celebration5];
     let lastCelebration = -1;
 
     function playWinCelebration() {
-        // Pick random, avoid repeat
+        // Pick random celebration sound (synth), avoid repeat
         let pick;
         do { pick = Math.floor(Math.random() * celebrations.length); } while (pick === lastCelebration);
         lastCelebration = pick;
-
-        // Play selected celebration sound
         try { celebrations[pick](); } catch(e) {}
 
-        // Tada MP3 overlay
-        if (tadaAudio) {
-            tadaAudio.currentTime = 0;
-            tadaAudio.play().catch(() => {});
+        // Pick random win MP3, avoid repeat (single audio)
+        if (winAudioPool.length > 0) {
+            let mp3Pick;
+            if (winAudioPool.length === 1) {
+                mp3Pick = 0;
+            } else {
+                do { mp3Pick = Math.floor(Math.random() * winAudioPool.length); } while (mp3Pick === lastWinAudioPick);
+            }
+            lastWinAudioPick = mp3Pick;
+            const audio = winAudioPool[mp3Pick];
+            try {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            } catch(e) {}
         }
-
     }
 
     // Expose functions globally for Alpine
