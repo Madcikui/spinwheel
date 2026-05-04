@@ -12,8 +12,10 @@ use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SpinSettings extends Page
 {
@@ -41,7 +43,7 @@ class SpinSettings extends Page
             'event_name' => Setting::get('event_name', 'Hari Anugerah & Cabutan Bertuah'),
             'instruction_text' => Setting::get('instruction_text', 'Sila ke kaunter hadiah untuk menuntut hadiah anda'),
             'bgm_type' => Setting::get('bgm_type', 'stock'),
-            'bgm_file' => $existingFile ? [$existingFile] : [],
+            'bgm_file' => $existingFile,
         ]);
     }
 
@@ -101,7 +103,8 @@ class SpinSettings extends Page
         Setting::set('bgm_type', $data['bgm_type']);
 
         if ($data['bgm_type'] === 'mp3' && ! empty($data['bgm_file'])) {
-            $filePath = is_array($data['bgm_file']) ? (string) end($data['bgm_file']) : (string) $data['bgm_file'];
+            $bgm = $data['bgm_file'];
+            $filePath = is_array($bgm) ? (string) end($bgm) : (string) $bgm;
             $oldFile = Setting::get('bgm_file');
 
             if ($filePath !== '' && $filePath !== $oldFile) {
