@@ -576,13 +576,7 @@
     let lastCelebration = -1;
 
     function playWinCelebration() {
-        // Pick random celebration sound (synth), avoid repeat
-        let pick;
-        do { pick = Math.floor(Math.random() * celebrations.length); } while (pick === lastCelebration);
-        lastCelebration = pick;
-        try { celebrations[pick](); } catch(e) {}
-
-        // Pick random win MP3, avoid repeat (single audio)
+        // Main MP3 menang sahaja — synth applause/celebration dibuang ikut request user.
         if (winAudioPool.length > 0) {
             let mp3Pick;
             if (winAudioPool.length === 1) {
