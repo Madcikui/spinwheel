@@ -367,6 +367,7 @@
     <div
         x-data
         x-init="
+            playWinCelebration();
             fireConfetti();
             setTimeout(() => fireConfetti(), 1500);
             setTimeout(() => fireConfetti(), 2500);
@@ -663,9 +664,6 @@ function spinWheel(prizes) {
                 });
             }
 
-            // Main muzik spin (random pick dari pool)
-            if (typeof window.playSpinSound === 'function') window.playSpinSound();
-
             playClickSound();
             this.$wire.spin();
         },
@@ -707,11 +705,8 @@ function spinWheel(prizes) {
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Wheel stopped — fade out spin music dan main celebration
-                    if (typeof window.stopSpinSound === 'function') window.stopSpinSound();
-                    playWinCelebration();
-                    fireConfetti();
-
+                    // Wheel stopped — show result modal; celebration sound + confetti
+                    // dipanggil dari modal x-init supaya lagu match dengan keluarnya modal
                     setTimeout(() => {
                         this.$wire.showResult();
                     }, 1200);
