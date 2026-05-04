@@ -626,27 +626,45 @@
     }
 
     // === MP3 MODE ===
+    let bgmStarting = false;
     function startMP3() {
-        bgmPlaying = true;
+        if (bgmStarting) return;  // attempt in progress; jangan reset
+        bgmStarting = true;
+        if (bgmAudio) { try { bgmAudio.pause(); } catch(e){} bgmAudio = null; }
         bgmAudio = new Audio(BGM_FILE);
         bgmAudio.loop = true;
         bgmAudio.volume = 0;
         bgmAudio.play().then(() => {
-            // Fade in
+            bgmStarting = false;
+            bgmPlaying = true;
+            const btn = document.getElementById('bgm-toggle');
+            if (btn) { btn.textContent = '🔊'; btn.title = 'Matikan Muzik'; }
             let vol = 0;
             const fade = setInterval(() => {
                 vol = Math.min(vol + 0.05, 0.6);
                 if (bgmAudio) bgmAudio.volume = vol;
                 if (vol >= 0.6) clearInterval(fade);
             }, 50);
-        }).catch(() => {});
+        }).catch(() => {
+            bgmStarting = false;
+            if (bgmAudio) { try { bgmAudio.pause(); } catch(e){} bgmAudio = null; }
+            bgmPlaying = false;
+        });
     }
 
     // === STOCK MODE (Bass + Drums + Arpeggio) ===
     function startStockBGM() {
         const ctx = getAudioCtx();
-        if (ctx.state === 'suspended') ctx.resume();
+        if (ctx.state === 'suspended') {
+            // Resume needs user gesture; jangan tanda bgmPlaying sehingga running.
+            ctx.resume().then(() => {
+                if (ctx.state === 'running' && !bgmPlaying) startStockBGM();
+            }).catch(() => {});
+            return;
+        }
         bgmPlaying = true;
+        const btn = document.getElementById('bgm-toggle');
+        if (btn) { btn.textContent = '🔊'; btn.title = 'Matikan Muzik'; }
 
         bgmGain = ctx.createGain();
         bgmGain.gain.setValueAtTime(0, ctx.currentTime);
@@ -803,14 +821,25 @@
     window.stopBGM = stopBGM;
     window.startBGM = startBGM;
 
+    function bgmIsReallyPlaying() {
+        if (BGM_TYPE === 'mp3') return !!(bgmAudio && !bgmAudio.paused) || bgmStarting;
+        try { return bgmPlaying && getAudioCtx().state === 'running'; }
+        catch (e) { return false; }
+    }
+
     function toggleBGM() {
         if (BGM_TYPE === 'off') return;
         const btn = document.getElementById('bgm-toggle');
-        if (bgmPlaying) {
+        if (bgmIsReallyPlaying()) {
             stopBGM();
             btn.textContent = '🔇';
             btn.title = 'Hidupkan Muzik';
         } else {
+            // Force fresh start kalau flag stale
+            if (bgmPlaying) {
+                bgmPlaying = false;
+                if (bgmAudio) { try { bgmAudio.pause(); } catch(e){} bgmAudio = null; }
+            }
             startBGM();
             btn.textContent = '🔊';
             btn.title = 'Matikan Muzik';
@@ -820,24 +849,19 @@
     // Auto-start BGM on first user interaction
     if (BGM_TYPE !== 'off') {
         const events = ['click', 'touchstart', 'keydown', 'mousedown', 'pointerdown'];
-        function isReallyPlaying() {
-            if (BGM_TYPE === 'mp3') return bgmAudio && !bgmAudio.paused;
-            // Stock: bgmPlaying flag + AudioContext running
-            try { return bgmPlaying && getAudioCtx().state === 'running'; }
-            catch (e) { return false; }
-        }
-        function autoStartBGM() {
+        const isReallyPlaying = bgmIsReallyPlaying;
+        function autoStartBGM(ev) {
+            // Skip kalau gesture sengaja pada butang BGM toggle — biar toggleBGM uruskan.
+            if (ev && ev.target && ev.target.closest && ev.target.closest('#bgm-toggle')) return;
             if (isReallyPlaying()) {
                 events.forEach(e => document.removeEventListener(e, autoStartBGM));
                 return;
             }
-            // Force restart kalau bgmPlaying=true tapi tak benar2 main (autoplay block)
             if (bgmPlaying) {
                 bgmPlaying = false;
                 if (bgmAudio) { try { bgmAudio.pause(); } catch(e){} bgmAudio = null; }
             }
             startBGM();
-            // Resume context kalau stock & masih suspended (user gesture context)
             try { const c = getAudioCtx(); if (c.state === 'suspended') c.resume(); } catch (e) {}
             const btn = document.getElementById('bgm-toggle');
             if (btn) btn.textContent = '🔊';
