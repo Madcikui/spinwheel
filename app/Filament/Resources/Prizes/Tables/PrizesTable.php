@@ -44,6 +44,10 @@ class PrizesTable
                 IconColumn::make('aktif')
                     ->boolean()
                     ->label('Aktif'),
+                IconColumn::make('boleh_bonus')
+                    ->boolean()
+                    ->label('Bonus Code')
+                    ->tooltip(fn ($state) => $state ? 'Hadiah ini termasuk dalam bonus code' : 'Hadiah ini DIKECUALIKAN dari bonus code'),
             ])
             ->recordActions([
                 EditAction::make(),
