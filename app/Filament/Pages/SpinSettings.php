@@ -7,6 +7,8 @@ use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
@@ -15,8 +17,10 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-class SpinSettings extends Page
+class SpinSettings extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected string $view = 'filament.pages.spin-settings';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
@@ -25,11 +29,7 @@ class SpinSettings extends Page
 
     protected static ?string $title = 'Tetapan Spin';
 
-    public ?string $spin_password = '';
-    public ?string $event_name = '';
-    public ?string $instruction_text = '';
-    public ?string $bgm_type = 'stock';
-    public ?array $bgm_file = null;
+    public ?array $data = [];
 
     public static function canAccess(): bool
     {
@@ -38,13 +38,15 @@ class SpinSettings extends Page
 
     public function mount(): void
     {
-        $this->spin_password = Setting::get('spin_password', 'TFE2026');
-        $this->event_name = Setting::get('event_name', 'Hari Anugerah & Cabutan Bertuah');
-        $this->instruction_text = Setting::get('instruction_text', 'Sila ke kaunter hadiah untuk menuntut hadiah anda');
-        $this->bgm_type = Setting::get('bgm_type', 'stock');
-
         $existingFile = Setting::get('bgm_file');
-        $this->bgm_file = $existingFile ? [$existingFile] : null;
+
+        $this->form->fill([
+            'spin_password' => Setting::get('spin_password', 'TFE2026'),
+            'event_name' => Setting::get('event_name', 'Hari Anugerah & Cabutan Bertuah'),
+            'instruction_text' => Setting::get('instruction_text', 'Sila ke kaunter hadiah untuk menuntut hadiah anda'),
+            'bgm_type' => Setting::get('bgm_type', 'stock'),
+            'bgm_file' => $existingFile ? [$existingFile] : [],
+        ]);
     }
 
     public function form(Schema $schema): Schema
@@ -82,28 +84,31 @@ class SpinSettings extends Page
                         FileUpload::make('bgm_file')
                             ->label('File MP3')
                             ->acceptedFileTypes(['audio/mpeg', 'audio/mp3'])
+                            ->disk('public')
                             ->directory('bgm')
+                            ->preserveFilenames()
                             ->maxSize(10240)
                             ->visible(fn ($get) => $get('bgm_type') === 'mp3')
                             ->helperText('Maks 10MB. Format: MP3.'),
                     ]),
-            ]);
+            ])
+            ->statePath('data');
     }
 
     public function save(): void
     {
-        Setting::set('spin_password', $this->spin_password);
-        Setting::set('event_name', $this->event_name);
-        Setting::set('instruction_text', $this->instruction_text);
-        Setting::set('bgm_type', $this->bgm_type);
+        $data = $this->form->getState();
 
-        // Handle BGM file
-        if ($this->bgm_type === 'mp3' && !empty($this->bgm_file)) {
-            $filePath = is_array($this->bgm_file) ? (end($this->bgm_file) ?: '') : $this->bgm_file;
+        Setting::set('spin_password', $data['spin_password']);
+        Setting::set('event_name', $data['event_name']);
+        Setting::set('instruction_text', $data['instruction_text']);
+        Setting::set('bgm_type', $data['bgm_type']);
+
+        if ($data['bgm_type'] === 'mp3' && ! empty($data['bgm_file'])) {
+            $filePath = is_array($data['bgm_file']) ? (string) end($data['bgm_file']) : (string) $data['bgm_file'];
             $oldFile = Setting::get('bgm_file');
 
-            if ($filePath && $filePath !== $oldFile) {
-                // Delete old file if different
+            if ($filePath !== '' && $filePath !== $oldFile) {
                 if ($oldFile && Storage::disk('public')->exists($oldFile)) {
                     Storage::disk('public')->delete($oldFile);
                 }
