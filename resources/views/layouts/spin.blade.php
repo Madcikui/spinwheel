@@ -825,18 +825,38 @@
 
     // Auto-start BGM on first user interaction
     if (BGM_TYPE !== 'off') {
-        let bgmAutoStarted = false;
+        const events = ['click', 'touchstart', 'keydown', 'mousedown', 'pointerdown'];
+        function isReallyPlaying() {
+            if (BGM_TYPE === 'mp3') return bgmAudio && !bgmAudio.paused;
+            // Stock: bgmPlaying flag + AudioContext running
+            try { return bgmPlaying && getAudioCtx().state === 'running'; }
+            catch (e) { return false; }
+        }
         function autoStartBGM() {
-            if (bgmAutoStarted) return;
-            bgmAutoStarted = true;
+            if (isReallyPlaying()) {
+                events.forEach(e => document.removeEventListener(e, autoStartBGM));
+                return;
+            }
+            // Force restart kalau bgmPlaying=true tapi tak benar2 main (autoplay block)
+            if (bgmPlaying) {
+                bgmPlaying = false;
+                if (bgmAudio) { try { bgmAudio.pause(); } catch(e){} bgmAudio = null; }
+            }
             startBGM();
+            // Resume context kalau stock & masih suspended (user gesture context)
+            try { const c = getAudioCtx(); if (c.state === 'suspended') c.resume(); } catch (e) {}
             const btn = document.getElementById('bgm-toggle');
             if (btn) btn.textContent = '🔊';
-            document.removeEventListener('click', autoStartBGM);
-            document.removeEventListener('touchstart', autoStartBGM);
+            setTimeout(() => {
+                if (isReallyPlaying()) {
+                    events.forEach(e => document.removeEventListener(e, autoStartBGM));
+                }
+            }, 300);
         }
-        document.addEventListener('click', autoStartBGM);
-        document.addEventListener('touchstart', autoStartBGM);
+        // Cuba auto-start serta-merta (mungkin gagal kalau autoplay block, takpa)
+        autoStartBGM();
+        // Fallback: trigger pada ANY user interaction
+        events.forEach(e => document.addEventListener(e, autoStartBGM));
     }
     </script>
 
