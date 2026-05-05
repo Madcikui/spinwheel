@@ -28,7 +28,7 @@ class BonusCode extends Model
     public static function generateCode(): string
     {
         do {
-            $code = 'TFE-' . strtoupper(Str::random(6));
+            $code = strtoupper(Str::random(4));
         } while (self::where('code', $code)->exists());
 
         return $code;
