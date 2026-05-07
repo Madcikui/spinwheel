@@ -38,8 +38,9 @@ class SpinPage extends Component
 
     public function mount(): void
     {
-        // Check cookie — kalau belum login, tunjuk gate
-        if (!request()->cookie('spin_auth')) {
+        // Cookie sekarang dilindungi EncryptCookies middleware — nilai yang diforge
+        // tak akan decrypt, jadi request->cookie() akan return null.
+        if (request()->cookie('spin_auth') !== 'true') {
             $this->step = 'gate';
         }
 
@@ -293,8 +294,17 @@ class SpinPage extends Component
                     $this->studentUmurId = $student->umur_id;
                 }
 
-                // Get available prizes (filtered by umur if applicable)
-                $prizesQuery = Prize::where('aktif', true)
+                // Hadiah dipilih MESTI dari slice yang ditunjuk pada wheel.
+                // Ini halang admin tukar prize/baki masa wheel tengah berputar
+                // → wheel berhenti slice salah, modal tunjuk hadiah lain.
+                $displayedPrizeIds = collect($this->prizes)->pluck('id')->filter()->all();
+
+                if (empty($displayedPrizeIds)) {
+                    throw new \Exception('Sila refresh halaman dan cuba semula.');
+                }
+
+                $prizesQuery = Prize::whereIn('id', $displayedPrizeIds)
+                    ->where('aktif', true)
                     ->where('kuantiti_baki', '>', 0);
 
                 if ($this->mode === 'bonus') {
@@ -311,7 +321,7 @@ class SpinPage extends Component
                 $availablePrizes = $prizesQuery->lockForUpdate()->get();
 
                 if ($availablePrizes->isEmpty()) {
-                    throw new \Exception('Semua hadiah telah habis.');
+                    throw new \Exception('Hadiah pada wheel telah habis. Sila refresh halaman.');
                 }
 
                 // Anti-repeat
@@ -350,17 +360,25 @@ class SpinPage extends Component
                 $this->winner = $selectedPrize->nama_hadiah;
                 $this->winnerImage = $selectedPrize->gambar;
 
-                // Cari index SEBELUM refresh — wheel masih guna senarai asal
+                // Cari index pada wheel — sebab kita constrain whereIn dgn displayedPrizeIds,
+                // search ni JANGAN return false. Kalau false, ada bug, batalkan transaksi.
                 $this->winnerPrizeIndex = collect($this->prizes)
                     ->search(fn ($p) => $p['id'] === $selectedPrize->id);
 
                 if ($this->winnerPrizeIndex === false) {
-                    $this->winnerPrizeIndex = 0;
+                    throw new \Exception('Sila refresh halaman dan cuba semula.');
                 }
             });
 
             $this->dispatch('prize-selected', prizeIndex: $this->winnerPrizeIndex ?? 0);
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Unique constraint hit (race: pelajar dah ada SpinLog).
+            if (str_contains($e->getMessage(), 'spin_logs_student_id_unique') || $e->getCode() === '23000') {
+                $this->errorMessage = 'Pelajar ini sudah membuat cabutan.';
+            } else {
+                $this->errorMessage = 'Ralat sistem. Sila cuba semula.';
+            }
         } catch (\Exception $e) {
             $this->errorMessage = $e->getMessage();
         }

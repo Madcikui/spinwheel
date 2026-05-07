@@ -205,7 +205,7 @@
                 wire:model="bonusCode"
                 wire:keydown.enter="verifyCode"
                 type="text"
-                placeholder="Contoh: TFE-X7K9M2"
+                placeholder="Contoh: X7K9"
                 class="input-neon w-full rounded-xl px-4 py-4 text-center text-lg font-bold tracking-[0.3em] uppercase"
             />
         </div>
