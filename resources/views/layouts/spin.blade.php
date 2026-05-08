@@ -247,6 +247,16 @@
     >🔇</button>
     @endif
 
+    <!-- Refresh Button (untuk staf TV mode fullscreen) -->
+    <button
+        id="page-refresh"
+        onclick="if (confirm('Refresh halaman? Data spin selamat dalam database.')) location.reload();"
+        title="Refresh Halaman"
+        style="position:fixed; bottom:20px; left:20px; z-index:50; width:48px; height:48px; border-radius:50%; border:2px solid rgba(34,197,94,0.5); background:rgba(15,10,30,0.8); backdrop-filter:blur(10px); color:white; font-size:22px; cursor:pointer; transition:all 0.3s; box-shadow:0 0 20px rgba(34,197,94,0.2);"
+        onmouseover="this.style.borderColor='#22c55e'; this.style.boxShadow='0 0 30px rgba(34,197,94,0.4)';"
+        onmouseout="this.style.borderColor='rgba(34,197,94,0.5)'; this.style.boxShadow='0 0 20px rgba(34,197,94,0.2)';"
+    >🔄</button>
+
     <div class="relative z-10">
         {{ $slot }}
     </div>
