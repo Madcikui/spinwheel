@@ -287,13 +287,13 @@
         x-data="spinWheel(@js($prizes))"
         x-init="init()"
         @prize-selected.window="spinTo($event.detail.prizeIndex)"
-        class="flex flex-col items-center gap-5 w-full max-w-3xl slide-up"
+        class="flex flex-col items-center gap-5 w-full max-w-3xl xl:max-w-5xl 2xl:max-w-7xl min-[2560px]:max-w-none slide-up"
     >
         <div class="text-center mb-2">
-            <h2 class="text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+            <h2 class="text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-extrabold text-white tracking-tight">
                 {{ $studentName }} <span class="neon-title">🎊</span>
             </h2>
-            <p class="text-purple-300/70 mt-2 text-base lg:text-lg">Tekan butang untuk putar roda!</p>
+            <p class="text-purple-300/70 mt-2 text-base lg:text-lg xl:text-2xl 2xl:text-3xl">Tekan butang untuk putar roda!</p>
         </div>
 
         {{-- Wheel Container with stand — responsive --}}
@@ -348,11 +348,11 @@
         <button
             @click="startSpin()"
             :disabled="spinning"
-            class="btn-spin btn-neon text-white font-extrabold text-xl py-4 px-14 rounded-full shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:animate-none"
+            class="btn-spin btn-neon text-white font-extrabold text-xl xl:text-3xl 2xl:text-4xl py-4 xl:py-6 2xl:py-8 px-14 xl:px-20 2xl:px-28 rounded-full shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:animate-none"
         >
             <span x-show="!spinning">🎡 PUTAR!</span>
             <span x-show="spinning" x-cloak class="flex items-center gap-2">
-                <svg class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin w-6 h-6 xl:w-8 xl:h-8" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
@@ -442,15 +442,21 @@ function spinWheel(prizes) {
         calcSize() {
             const vw = window.innerWidth;
             const vh = window.innerHeight;
-            if (vw >= 1920)      this.wheelSize = 600;
-            else if (vw >= 1280) this.wheelSize = 480;
-            else if (vw >= 1024) this.wheelSize = 420;
-            else if (vw >= 768)  this.wheelSize = 380;
-            else                 this.wheelSize = Math.min(vw - 40, 340);
+            // Reserved untuk header (judul + tagline) + stand + button + padding
+            const reservedHeight = 320;
+            const maxByHeight = vh - reservedHeight;
 
-            // Also cap by available height (leave room for header + button)
-            const maxByHeight = vh - 240;
-            if (this.wheelSize > maxByHeight) this.wheelSize = Math.max(280, maxByHeight);
+            // Target: wheel ambil ~50-70% lebar viewport, capped supaya muat tinggi.
+            let target;
+            if (vw >= 3840)      target = Math.min(vw * 0.40, maxByHeight, 1400);  // 4K TV
+            else if (vw >= 2560) target = Math.min(vw * 0.42, maxByHeight, 1100);  // QHD/2.5K
+            else if (vw >= 1920) target = Math.min(vw * 0.48, maxByHeight, 900);   // 1080p TV / large desktop
+            else if (vw >= 1280) target = Math.min(vw * 0.45, maxByHeight, 600);
+            else if (vw >= 1024) target = Math.min(vw * 0.50, maxByHeight, 480);
+            else if (vw >= 768)  target = Math.min(vw * 0.55, maxByHeight, 420);
+            else                 target = Math.min(vw - 40, maxByHeight, 340);
+
+            this.wheelSize = Math.max(280, Math.floor(target));
         },
 
         setupCanvas() {
