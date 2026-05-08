@@ -44,7 +44,7 @@ class SpinPage extends Component
             $this->step = 'gate';
         }
 
-        $this->eventName = Setting::get('event_name', 'Hari Anugerah & Cabutan Bertuah');
+        $this->eventName = Setting::get('event_name', 'Hari Anugerah & STARZ LUCKY PICK');
         $this->instructionText = Setting::get('instruction_text', 'Sila ke kaunter hadiah untuk menuntut hadiah anda');
     }
 
@@ -422,7 +422,7 @@ class SpinPage extends Component
 
         return view('livewire.spin-page')
             ->layout('layouts.spin', [
-                'branchName' => $this->branchName ?? 'Cabutan Bertuah',
+                'branchName' => $this->branchName ?? 'STARZ LUCKY PICK',
                 'bgmType' => Setting::get('bgm_type', 'stock'),
                 'bgmFile' => Setting::get('bgm_file'),
                 'winSoundUrls' => $winSoundUrls,

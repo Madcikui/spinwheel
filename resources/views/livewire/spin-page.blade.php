@@ -19,7 +19,7 @@
     <div class="card-neon rounded-3xl p-8 w-full max-w-sm text-center slide-up relative scanline">
         <div class="text-6xl mb-4" style="filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));">🔐</div>
         <h1 class="text-2xl font-black neon-title mb-2">Masukkan Password</h1>
-        <p class="text-sm text-gray-500 mb-6">Untuk akses Cabutan Bertuah</p>
+        <p class="text-sm text-gray-500 mb-6">Untuk akses STARZ LUCKY PICK</p>
 
         <div class="mb-5">
             <input
@@ -53,7 +53,7 @@
     @if($step === 'home')
     <div class="card-neon rounded-3xl p-8 w-full max-w-md text-center slide-up relative scanline">
         <div class="text-7xl mb-4" style="filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));">🎡</div>
-        <h1 class="text-4xl font-black neon-title mb-2">Cabutan Bertuah</h1>
+        <h1 class="text-4xl font-black neon-title mb-2">STARZ LUCKY PICK</h1>
         <p class="text-sm text-purple-300/80 font-medium mb-10 tracking-widest uppercase">Tadika Fitrah Ehsan</p>
 
         <div class="grid grid-cols-2 gap-4">
@@ -63,7 +63,7 @@
                 class="group p-6 rounded-2xl border border-white/10 hover:border-purple-500/50 bg-white/5 hover:bg-purple-500/10 transition-all duration-300"
             >
                 <div class="text-5xl mb-3 group-hover:scale-110 transition-transform">🎡</div>
-                <div class="text-white font-bold text-sm">Cabutan Bertuah</div>
+                <div class="text-white font-bold text-sm">STARZ LUCKY PICK</div>
                 <div class="text-gray-500 text-xs mt-1">Guna No. IC</div>
             </button>
 
@@ -84,7 +84,7 @@
     @if($step === 'ic')
     <div class="card-neon rounded-3xl p-8 w-full max-w-md text-center slide-up relative scanline">
         <div class="text-7xl mb-4 animate-bounce" style="filter: drop-shadow(0 0 20px rgba(168,85,247,0.5));">🎡</div>
-        <h1 class="text-4xl font-black neon-title mb-2">Cabutan Bertuah</h1>
+        <h1 class="text-4xl font-black neon-title mb-2">STARZ LUCKY PICK</h1>
         <p class="text-sm text-purple-300/80 font-medium mb-8 tracking-widest uppercase">Tadika Fitrah Ehsan</p>
 
         <div class="mb-6">

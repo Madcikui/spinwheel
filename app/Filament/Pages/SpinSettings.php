@@ -38,7 +38,7 @@ class SpinSettings extends Page
 
         $this->form->fill([
             'spin_password' => Setting::get('spin_password', 'TFE2026'),
-            'event_name' => Setting::get('event_name', 'Hari Anugerah & Cabutan Bertuah'),
+            'event_name' => Setting::get('event_name', 'Hari Anugerah & STARZ LUCKY PICK'),
             'instruction_text' => Setting::get('instruction_text', 'Sila ke kaunter hadiah untuk menuntut hadiah anda'),
             'bgm_type' => Setting::get('bgm_type', 'stock'),
             'bgm_file' => $existingFile,
@@ -58,7 +58,7 @@ class SpinSettings extends Page
                         TextInput::make('event_name')
                             ->label('Nama Event')
                             ->required()
-                            ->helperText('Contoh: Hari Anugerah & Cabutan Bertuah'),
+                            ->helperText('Contoh: Hari Anugerah & STARZ LUCKY PICK'),
                         TextInput::make('instruction_text')
                             ->label('Mesej Arahan Hadiah')
                             ->required()
